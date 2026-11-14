@@ -1,0 +1,149 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "The lower bound R(5,5) ≥ 43: a kernel-checked Ramsey graph on 42 vertices"
+  description: >-
+    A Lean 4 / Mathlib proof of Exoo's lower bound R(5,5) ≥ 43 for the diagonal graph Ramsey
+    number: there is a simple graph on 42 vertices with no clique of size 5 and no independent
+    set of size 5. The proof defines a clique scan on natural-number bit masks, proves that a
+    scan with the result `false` excludes every clique of the given size, and lets the Lean
+    kernel evaluate the scan on one explicit graph and on its complement (`decide +kernel`,
+    no `native_decide`). The statement is the one that the Formal Conjectures repository
+    records as `RamseyNumbers.ramsey_number_five_five_lower_bound`. The value of R(5,5) is
+    open; 43 has been the best known lower bound since 1989.
+  authors:
+    - "Arth Singh"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Arth Singh"
+
+classification:
+  arxiv: ["math.CO"]
+  msc2020: ["05D10", "05C55", "68V20"]
+
+sources:
+  - title: "A lower bound for R(5,5)"
+    authors:
+      - "Geoffrey Exoo"
+    id: "doi:10.1002/jgt.3190130113"
+    type: "paper"
+    location: "Journal of Graph Theory 13 (1989), no. 1, 97–98"
+    relationship: "formalizes"
+    note: >-
+      The paper shows R(5,5) ≥ 43 by a two-colouring of the edges of K_42 without a
+      monochromatic K_5, found by computer search. The Lean proof checks one explicit graph
+      of this kind inside the kernel.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+  - title: "Study of Exoo's Lower Bound for Ramsey number R(5,5)"
+    authors:
+      - "Lachlan Ge"
+      - "Yasiru Jayasooriya"
+      - "Alex Qiu"
+      - "Michael Sun"
+      - "Victor Yuan"
+    id: "arXiv:2212.12630"
+    type: "paper"
+    location: "https://arxiv.org/abs/2212.12630"
+    relationship: "other"
+    note: >-
+      Source of the explicit description of the colouring Exoo(42) from which the adjacency
+      bit masks in `RamseyR55.exooRows` were built (a cyclic colouring on 43 vertices, one
+      vertex removed, 16 edges recoloured). The Lean proof does not follow the hand argument
+      of this paper; it checks the graph by computation.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+
+related_formalizations:
+  - id: "https://github.com/google-deepmind/formal-conjectures"
+    relationship: "other"
+    note: >-
+      Source of the Lean statement: `RamseyNumbers.ramsey_number_five_five_lower_bound` in
+      `FormalConjectures/Wikipedia/RamseyNumbers.lean`, stated there without a proof. The
+      statement of `Challenge.lean` is the same proposition. On 2026-11-14 a search of GitHub
+      and of the Palomar registry found no earlier formal proof of this statement. This
+      project makes no claim of priority.
+
+status:
+  scope: >-
+    Exactly one statement is proved: there exists a simple graph on Fin 42 that is
+    CliqueFree 5 and whose complement is CliqueFree 5. Nothing is proved about the value of
+    R(5,5), about the Mathlib-independent definition of Ramsey numbers, or about upper
+    bounds. The project does not prove that the witness graph is the graph of Exoo's 1989
+    paper; the statement does not depend on that.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "autonomous"
+      models: ["gpt-6-astra"]
+      framework: "OpenAI Codex CLI 0.167.1 (headless sessions) inside a private multi-agent harness"
+      tool_setup: >-
+        One agent of a 25-agent run wrote the clique scan, its completeness proof, the graph
+        from bit masks, and the assembly of the final theorem. A verifier daemon compiled each
+        submission with Lean and accepted only the axioms propext, Classical.choice, and
+        Quot.sound. No human edited the proof.
+      cost:
+        wall_time: "about 6 minutes from the start of the run to the verified proof"
+        spend_usd: "subscription-based"
+        hardware: "local machine"
+      prompting_notes: >-
+        The agent received the statement, the adjacency bit masks of the graph, and a probe
+        that showed that `decide +kernel` can evaluate a bit-mask clique search on 42 vertices.
+    - method: "agent"
+      models: ["claude-fable-5-2"]
+      framework: "Claude Code"
+      tool_setup: >-
+        Prepared the inputs of the run (graph data from the description in arXiv:2212.12630,
+        the kernel-evaluation probe), operated the run, re-checked the proof, and ported it to
+        this repository: Lean 4.35 module layout, neutral declaration names, docstrings, and
+        this metadata. Changes to the agent's Lean text: declarations renamed, docstrings
+        added, two unused declarations removed, and one lemma name updated for Lean 4.35
+        (`Nat.testBit_land` to `Nat.testBit_and`). The proof steps are otherwise the agent's.
+      cost:
+        wall_time: "about 2 hours"
+        spend_usd: "subscription-based"
+        hardware: "local machine"
+      prompting_notes: "n/a"
+  spend_usd: "subscription-based"
+  notes: >-
+    The proof text is machine-written. The maintainer directed the work and is responsible for
+    this submission, and did not write or edit the Lean proof.
+
+fidelity:
+  divergences: >-
+    The source obtains the colouring by computer search and checks it by a program. This
+    project checks one explicit graph inside the Lean kernel. The statement is given for
+    graphs (a graph and its complement), which is equivalent to the two-colouring form of
+    the source.
+
+review:
+  status: "agent-reviewed"
+  reviewers:
+    - "Claude Fable 5.2 (AI assistant, operator side)"
+  notes: >-
+    Checks made before submission: the proof was compiled again outside the verifier of the
+    run; `#print axioms` shows only propext, Classical.choice, and Quot.sound; the source has
+    no `native_decide`, `axiom`, `unsafe`, or `implemented_by`; the bit masks equal the
+    graph6 encoding of the input graph, are symmetric and loop-free, and an independent
+    Python search finds no 5-clique in the graph or in its complement; the statement was
+    compared with the Formal Conjectures statement. No human has read the proof line by line.
+
+alignment:
+  namespace: "RamseyR55"
+  statements:
+    - source: "Exoo (1989), main result: R(5,5) ≥ 43"
+      lean: "RamseyR55.ramsey_number_five_five_lower_bound"
+      module: "Solution"
+      status: "proved"
+      note: >-
+        The existence of a graph on 42 vertices with no 5-clique and no independent 5-set is
+        the statement R(5,5) > 42.
+
+acknowledgements: >-
+  Mathlib for the graph theory library; the Formal Conjectures project for the statement;
+  G. Exoo for the result; Ge, Jayasooriya, Qiu, Sun, and Yuan for the explicit description
+  of the colouring.
